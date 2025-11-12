@@ -39,57 +39,81 @@
       </div>
     </v-main>
     
-    <!-- Kacheln unter dem Slider -->
-    <section class="features">
-      <v-container class="features-container">
-        <v-row align="stretch" justify="center" no-gutters>
-          <v-col cols="12" md="3" class="feature-col">
-            <v-card class="feature-card" elevation="0">
-              <div class="feature-header">FENSTER</div>
-              <RouterLink to="/fensterpage" class="feature-media">
-                <v-img src="https://placehold.co/640x360/png?text=Fenster" cover alt="Fenster" />
-              </RouterLink>
-              <div class="feature-body">
-                Neue Maßstäbe – Stabilität, Sicherheit und hervorragende Wärmedämmung.
-              </div>
-            </v-card>
-          </v-col>
-          <v-col cols="12" md="3" class="feature-col">
-            <v-card class="feature-card" elevation="0">
-              <div class="feature-header">HAUSTÜREN</div>
-              <RouterLink to="/tuerenpage" class="feature-media">
-                <v-img src="https://placehold.co/640x360/png?text=Haust%C3%BCren" cover alt="Haustüren" />
-              </RouterLink>
-              <div class="feature-body">
-                Moderne oder klassische Haustüren – vielfältige Designs und Glasoptiken.
-              </div>
-            </v-card>
-          </v-col>
-          <v-col cols="12" md="3" class="feature-col">
-            <v-card class="feature-card" elevation="0">
-              <div class="feature-header">INNENTÜREN</div>
-              <RouterLink to="/innentuerenpage" class="feature-media">
-                <v-img src="https://placehold.co/640x360/png?text=Innent%C3%BCren" cover alt="Innentüren" />
-              </RouterLink>
-              <div class="feature-body">
-                Variables Modelldesign für individuelle Gestaltungsfreiheit im Innenraum.
-              </div>
-            </v-card>
-          </v-col>
-          <v-col cols="12" md="3" class="feature-col">
-            <v-card class="feature-card" elevation="0">
-              <div class="feature-header">AKTIONEN</div>
-              <a href="#" class="feature-media" aria-label="Aktionen ansehen">
-                <v-img src="https://placehold.co/640x360/png?text=Aktionen" cover alt="Aktionen" />
-              </a>
-              <div class="feature-body">
-                Verbinden Sie Preisvorteile mit Design, Qualität und Sicherheit.
-              </div>
-            </v-card>
-          </v-col>
-        </v-row>
+    <!-- Inhalt unter dem Slider -->
+    <!-- Introtext über die gesamte Breite -->
+    <section class="intro" aria-label="Einleitung">
+      <v-container>
+        <!-- Intro-Text (ändern über Prop: introText) -->
+        <p class="intro-text">{{ introText }}</p>
       </v-container>
     </section>
+
+
+    <!-- Aktionen mit Kategorie-Tabs -->
+    <section id="aktionen" class="actions-of-week" aria-labelledby="aktionen-heading">
+      <v-container>
+        <h2 id="aktionen-heading" class="section-title">AKTIONEN</h2>
+        <!-- Kategorie-Auswahl: waagrecht, modern -->
+        <v-tabs
+          v-model="selectedCategory"
+          align-tabs="center"
+          class="actions-tabs"
+          grow
+        >
+          <v-tab v-for="cat in actionCategories" :key="cat" :value="cat">{{ cat }}</v-tab>
+        </v-tabs>
+        <div class="actions-grid">
+          <article
+            v-for="(card, i) in filteredCards"
+            :key="i"
+            class="action-card"
+            itemscope
+            itemtype="https://schema.org/Offer"
+          >
+            <a
+              class="action-media"
+              :href="card.ctaHref || '#'"
+              :aria-label="'Bild zu ' + card.title"
+            >
+              <!-- Bild-Platzhalter / Motiv tauschen: card.img -->
+              <img :src="card.img" :alt="card.title" loading="lazy" itemprop="image" />
+            </a>
+            <div class="action-content">
+              <!-- Titel & Beschreibung tauschen: card.title / card.description -->
+              <h3 class="action-title" itemprop="name">{{ card.title }}</h3>
+              <p class="action-desc" itemprop="description">{{ card.description }}</p>
+              <!-- Optionaler Button-Text/Link: card.ctaLabel / card.ctaHref -->
+              <v-btn
+                v-if="card.ctaLabel"
+                class="action-btn action-btn--red"
+                variant="flat"
+                :aria-label="card.ctaLabel + ' zu ' + card.title"
+                @click.prevent="openCard(card)"
+              >
+                {{ card.ctaLabel }}
+              </v-btn>
+            </div>
+          </article>
+        </div>
+        <!-- Kleine Detailbox (Dialog) -->
+        <v-dialog v-model="detailOpen" max-width="420" persistent>
+          <v-card rounded="lg" elevation="12">
+            <v-card-title class="text-h6">{{ selectedCard?.title }}</v-card-title>
+            <v-card-text>
+              <div v-if="selectedCard?.img" class="detail-media">
+                <img :src="selectedCard.img" :alt="selectedCard.title" />
+              </div>
+              <p class="detail-desc">{{ selectedCard?.description }}</p>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer />
+              <v-btn variant="text" @click="detailOpen = false">Schließen</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+      </v-container>
+    </section>
+
     
     <!-- Desktop-only Buttons (visible on large desktop only) -->
     <v-row class="btns desktop-only" align="center" justify="center" no-gutters>
@@ -97,13 +121,70 @@
       <v-btn class="menu-btn" :to="'/tuerenpage'">Haustüren</v-btn>
       <v-btn class="menu-btn" href="https://configurator.varialis.net/?bpi=BC27B19A-C106-404F-96C2-60B7AC4C9FD0" target="_blank" rel="noopener">Haustürenkonfigurator</v-btn>
       <v-btn class="menu-btn" :to="'/innentuerenpage'">Innentüren</v-btn>
+      <v-btn class="menu-btn" @click="scrollToId('aktionen')">Aktionen</v-btn>
       <v-btn class="menu-btn highlight">Impressum</v-btn>
     </v-row>
+
+    <!-- Kontakt-Popup (modern, normale Größe) -->
+    <v-dialog id="email-dialog" v-model="contactOpen" max-width="480" persistent aria-label="Kontakt per E‑Mail">
+      <v-card elevation="8" rounded="lg">
+        <v-card-title class="text-h6">Kontakt per E‑Mail</v-card-title>
+        <v-card-text>
+          <p class="contact-text">Kontaktieren Sie uns per Mail – wir melden uns rasch zurück.</p>
+          <!-- E-Mail-Adresse hier anpassen: contactEmail (Prop) -->
+          <v-alert type="info" variant="tonal" border="start" class="mb-3" density="comfortable">
+            <strong>{{ contactEmail }}</strong>
+          </v-alert>
+
+          <!-- Demo-Kontaktformular: E-Mail, Nachricht, Telefonnummer -->
+          <v-form @submit.prevent="submitDemo" class="contact-form" aria-label="Kontaktformular (Demo)">
+            <v-text-field
+              v-model="form.email"
+              type="email"
+              label="Ihre E‑Mail"
+              placeholder="name@beispiel.at"
+              variant="outlined"
+              density="comfortable"
+              :rules="[v => !v || /.+@.+\..+/.test(v) || 'Bitte gültige E‑Mail eingeben']"
+            />
+            <v-text-field
+              v-model="form.phone"
+              type="tel"
+              label="Telefonnummer"
+              placeholder="z. B. +43 664 1234567"
+              variant="outlined"
+              density="comfortable"
+            />
+            <v-textarea
+              v-model="form.message"
+              label="Ihre Nachricht (was Sie möchten)"
+              placeholder="Kurz beschreiben, was Sie benötigen…"
+              variant="outlined"
+              density="comfortable"
+              rows="4"
+              auto-grow
+            />
+            <div class="contact-actions">
+              <v-spacer />
+              <v-btn variant="text" @click="contactOpen = false">Schließen</v-btn>
+              <v-btn type="submit" variant="flat">Absenden (Demo)</v-btn>
+            </div>
+          </v-form>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
+    <!-- Floating CTA: Roter Text + Icon-Button -->
+    <div class="contact-cta" role="group" aria-label="Kontakt öffnen">
+      <button class="contact-fab" type="button" aria-controls="email-dialog" @click="contactOpen = true" aria-label="Kontakt per E‑Mail öffnen">
+        ✉️
+      </button>
+    </div>
   </v-app>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import logo from '@/assets/logo.png'
 
@@ -121,8 +202,165 @@ const navItems = [
   { label: 'Haustüren' },
   { label: 'Haustürenkonfigurator' },
   { label: 'Innentüren' },
+  { label: 'Aktionen' },
   { label: 'Impressum' },
 ]
+
+// Aktionen-Kategorien (Tabs) und Auswahl
+const actionCategories = ['Fensteraktionen', 'Türenaktionen', 'Haustürenaktionen']
+const selectedCategory = ref(actionCategories[0])
+
+// Kontakt-Popup Zustand
+const contactOpen = ref(false)
+
+// Demo-Formular Zustand
+const form = ref({ email: '', phone: '', message: '' })
+
+function submitDemo() {
+  // Demo: hier könnte später ein echter Versand erfolgen
+  console.log('Demo submit:', { ...form.value })
+  contactOpen.value = false
+}
+
+// --- Dynamische Inhalte per Props (mit Defaults) ---
+// Intro-Text, Link-Leiste und Aktions-Karten können über Props überschrieben werden.
+const props = defineProps({
+  // Intro-Text oberhalb der Link-Leiste
+  introText: {
+    type: String,
+    default:
+      'Wir bieten Ihnen moderne Fenster, Haustüren und Innentüren – hochwertig, energieeffizient und individuell angepasst.'
+  },
+  // Links der horizontalen Leiste (Label + Ziel-ID)
+  links: {
+    type: Array,
+    default: () => [
+      { label: 'Fenster', target: 'fenster' },
+      { label: 'Haustüren', target: 'haustueren' },
+      { label: 'Innentüren', target: 'innentueren' },
+      { label: 'Aktionen', target: 'aktionen' }
+    ]
+  },
+  // Karten für "Moderne Aktionen der Woche"
+  actionCards: {
+    type: Array,
+    default: () => [
+      {
+        title: 'Design-Fenster A100',
+        description: 'Schlanke Profile, starke Dämmwerte – ideal für Neubau & Sanierung.',
+        img: 'https://placehold.co/800x450/png?text=Aktion+1',
+        ctaLabel: 'Details',
+        ctaHref: '#aktionen'
+      },
+      {
+        title: 'Haustür Modern Line',
+        description: 'Sicher, wartungsarm und formschön – inklusive Mehrfachverriegelung.',
+        img: 'https://placehold.co/800x450/png?text=Aktion+2',
+        ctaLabel: 'Details',
+        ctaHref: '#aktionen'
+      },
+      {
+        title: 'Innentür Classic White',
+        description: 'Zeitloses Design mit robusten Oberflächen für viel Alltag.',
+        img: 'https://placehold.co/800x450/png?text=Aktion+3'
+        // Button optional weglassen
+      }
+    ]
+  }
+  ,
+  // Strukturierte Aktionsdaten je Kategorie (für Tabs)
+  actionData: {
+    type: Object,
+    default: () => ({
+      'Fensteraktionen': [
+        {
+          title: 'Fenster Aktion 1',
+          description: 'PVC-Alu, Top U-Wert, kurze Lieferzeit.',
+          img: 'https://placehold.co/800x450/png?text=Fenster+1',
+          ctaLabel: 'Details',
+          ctaHref: '#'
+        },
+        {
+          title: 'Fenster Aktion 2',
+          description: 'Schmale Profile, viel Licht, leise Beschläge.',
+          img: 'https://placehold.co/800x450/png?text=Fenster+2',
+          ctaLabel: 'Details',
+          ctaHref: '#'
+        },
+        {
+          title: 'Fenster Aktion 3',
+          description: 'Sanierungs-Set inkl. Montagezubehör.',
+          img: 'https://placehold.co/800x450/png?text=Fenster+3'
+        }
+      ],
+      'Türenaktionen': [
+        {
+          title: 'Innentür Aktion 1',
+          description: 'Zeitlos weiß, robust, pflegeleicht.',
+          img: 'https://placehold.co/800x450/png?text=Innentuer+1',
+          ctaLabel: 'Details',
+          ctaHref: '#'
+        },
+        {
+          title: 'Innentür Aktion 2',
+          description: 'Echtholz-Dekor, leise Schließung.',
+          img: 'https://placehold.co/800x450/png?text=Innentuer+2'
+        },
+        {
+          title: 'Innentür Aktion 3',
+          description: 'Glastür satiniert inkl. Beschlag.',
+          img: 'https://placehold.co/800x450/png?text=Innentuer+3'
+        }
+      ],
+      'Haustürenaktionen': [
+        {
+          title: 'Haustür Aktion 1',
+          description: 'Mehrfachverriegelung, RC2-Option.',
+          img: 'https://placehold.co/800x450/png?text=Haustuer+1',
+          ctaLabel: 'Details',
+          ctaHref: '#'
+        },
+        {
+          title: 'Haustür Aktion 2',
+          description: 'Thermo-Kern, Top Dichtungssystem.',
+          img: 'https://placehold.co/800x450/png?text=Haustuer+2'
+        },
+        {
+          title: 'Haustür Aktion 3',
+          description: 'Modernes Design mit Seitenteil.',
+          img: 'https://placehold.co/800x450/png?text=Haustuer+3'
+        }
+      ]
+    })
+  }
+})
+// Gefilterte Karten je nach Kategorie
+const filteredCards = computed(() => props.actionData[selectedCategory.value] || [])
+
+// Detail-Dialog Zustand
+const detailOpen = ref(false)
+const selectedCard = ref(null)
+function openCard(card) {
+  selectedCard.value = card
+  detailOpen.value = true
+}
+// --- Kontakt-Popup Einstellungen ---
+
+// Optional: Popup automatisch öffnen (wenn aktiviert)
+onMounted(() => {
+  if (props.contactAutoOpen) {
+    const delay = Math.max(0, Number(props.contactDelayMs || 0))
+    if (delay) setTimeout(() => (contactOpen.value = true), delay)
+    else contactOpen.value = true
+  }
+})
+
+function scrollToId(id) {
+  const el = document.getElementById(id)
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+}
 
 function onNav(item) {
   menuOpen.value = false
@@ -134,6 +372,8 @@ function onNav(item) {
     window.open('https://configurator.varialis.net/?bpi=BC27B19A-C106-404F-96C2-60B7AC4C9FD0', '_blank', 'noopener')
   } else if (item.label === 'Innentüren') {
     router.push('/innentuerenpage')
+  } else if (item.label === 'Aktionen') {
+    scrollToId('aktionen')
   }
 }
 
@@ -142,13 +382,27 @@ function onNav(item) {
 </script>
 
 <style>
+. 
 /* --- Layout --- */
+:root { --page-bg: #fafafa; }
+html, body { background: var(--page-bg); }
 .slide {
   position: relative;
   /* Use small viewport units for better mobile behavior */
   height: 100svh;
   overflow: hidden;
   isolation: isolate;
+  background: var(--page-bg);
+}
+
+/* Bottom fade-out from slide into light background */
+.slide::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -1px;
+  height: 22svh; /* schneller Verlauf nach unten */
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(255,255,255,0), var(--page-bg) 65%);
 }
 
 .background {
@@ -252,18 +506,132 @@ function onNav(item) {
   .btns.desktop-only { gap: 32px; top: 28px; right: 32px; }
 }
 
-/* --- Features --- */
-.features { background: #f5f5f7; padding: 32px 0; }
-.features-container { max-width: 1200px; }
-.feature-col { padding: 12px; }
-.feature-card { background: white; border: 1px solid #e5e7eb; }
-.feature-header {
-  background: #e5e7eb;
+/* --- Intro & Anchor Nav --- */
+.intro { padding: 24px 0; background: var(--page-bg); }
+.intro-text {
+  font-size: 1.125rem;
+  line-height: 1.6;
   text-align: center;
-  padding: 16px 12px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
+  margin: 0;
 }
-.feature-media { display: block; }
-.feature-body { padding: 16px; color: #4b5563; text-align: center; }
+
+.anchor-nav {
+  background: var(--page-bg);
+  border-top: 1px solid rgba(0,0,0,0.08);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+.anchor-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  justify-content: center;
+  padding: 12px 0;
+  margin: 0;
+  list-style: none;
+}
+.anchor-link {
+  text-decoration: none;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.anchor-link:focus-visible { outline: 2px dashed currentColor; outline-offset: 2px; }
+
+/* --- Aktionen der Woche --- */
+.actions-of-week {
+  padding: 64px 0 48px;
+  background: var(--page-bg);
+}
+.section-title {
+  text-align: center;
+  margin: 0 0 32px;
+  font-weight: 800;
+  font-size: 2rem;
+  letter-spacing: 0.02em;
+}
+
+.actions-tabs { margin: 8px 0 16px; }
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 32px;
+}
+@media (min-width: 640px) {
+  .actions-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1024px) {
+  .actions-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+.action-card {
+  background: white;
+  border: none;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.action-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+}
+.action-media { display: block; aspect-ratio: 16/9; overflow: hidden; }
+.action-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.action-content {
+  padding: 24px;
+  display: grid;
+  gap: 12px;
+}
+.action-title { margin: 0; font-size: 1.05rem; }
+.action-desc { margin: 0; opacity: 0.9; line-height: 1.5; }
+.action-btn { align-self: start; }
+/* Roter Button (dunkel) */
+.action-btn--red {
+  background: #b71c1c !important; /* dunkler Rotton */
+  color: #fff !important;
+}
+.action-btn--red:hover { background: #9a1616 !important; }
+
+/* Detail-Dialog Media */
+.detail-media { margin: -8px 0 12px; border-radius: 10px; overflow: hidden; }
+.detail-media img { width: 100%; height: auto; display: block; }
+.detail-desc { margin: 0; line-height: 1.5; }
+
+/* --- Anker-Ziel-Sektionen (Platzhalter) --- */
+.anchor-target { padding: 40px 0; }
+.anchor-target h2 { margin-top: 0; }
+
+/* --- Kontakt-Popup / FAB --- */
+.contact-cta {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 2147483647;
+}
+@media (min-width: 768px) {
+  .contact-cta { right: 24px; bottom: 24px; }
+}
+.contact-fab {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1px solid rgba(214,48,49,0.35);
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.10);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  cursor: pointer;
+}
+.contact-fab:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+@media (min-width: 768px) {
+  .contact-fab { right: 24px; bottom: 24px; }
+}
 </style>
