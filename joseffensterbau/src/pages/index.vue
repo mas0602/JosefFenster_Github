@@ -38,91 +38,20 @@
         </v-carousel>
       </div>
     </v-main>
-    
-    <!-- Inhalt unter dem Slider -->
-    <!-- Introtext über die gesamte Breite -->
-    <section class="intro" aria-label="Einleitung">
-      <v-container>
-        <!-- Intro-Text (ändern über Prop: introText) -->
-        <p class="intro-text">{{ introText }}</p>
-      </v-container>
-    </section>
 
 
-    <!-- Aktionen mit Kategorie-Tabs -->
-    <section id="aktionen" class="actions-of-week" aria-labelledby="aktionen-heading">
-      <v-container>
-        <h2 id="aktionen-heading" class="section-title">AKTIONEN</h2>
-        <!-- Kategorie-Auswahl: waagrecht, modern -->
-        <v-tabs
-          v-model="selectedCategory"
-          align-tabs="center"
-          class="actions-tabs"
-          grow
-        >
-          <v-tab v-for="cat in actionCategories" :key="cat" :value="cat">{{ cat }}</v-tab>
-        </v-tabs>
-        <div class="actions-grid">
-          <article
-            v-for="(card, i) in filteredCards"
-            :key="i"
-            class="action-card"
-            itemscope
-            itemtype="https://schema.org/Offer"
-          >
-            <a
-              class="action-media"
-              :href="card.ctaHref || '#'"
-              :aria-label="'Bild zu ' + card.title"
-            >
-              <!-- Bild-Platzhalter / Motiv tauschen: card.img -->
-              <img :src="card.img" :alt="card.title" loading="lazy" itemprop="image" />
-            </a>
-            <div class="action-content">
-              <!-- Titel & Beschreibung tauschen: card.title / card.description -->
-              <h3 class="action-title" itemprop="name">{{ card.title }}</h3>
-              <p class="action-desc" itemprop="description">{{ card.description }}</p>
-              <!-- Optionaler Button-Text/Link: card.ctaLabel / card.ctaHref -->
-              <v-btn
-                v-if="card.ctaLabel"
-                class="action-btn action-btn--red"
-                variant="flat"
-                :aria-label="card.ctaLabel + ' zu ' + card.title"
-                @click.prevent="openCard(card)"
-              >
-                {{ card.ctaLabel }}
-              </v-btn>
-            </div>
-          </article>
-        </div>
-        <!-- Kleine Detailbox (Dialog) -->
-        <v-dialog v-model="detailOpen" max-width="420" persistent>
-          <v-card rounded="lg" elevation="12">
-            <v-card-title class="text-h6">{{ selectedCard?.title }}</v-card-title>
-            <v-card-text>
-              <div v-if="selectedCard?.img" class="detail-media">
-                <img :src="selectedCard.img" :alt="selectedCard.title" />
-              </div>
-              <p class="detail-desc">{{ selectedCard?.description }}</p>
-            </v-card-text>
-            <v-card-actions>
-              <v-spacer />
-              <v-btn variant="text" @click="detailOpen = false">Schließen</v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-      </v-container>
-    </section>
+
+  
 
     
     <!-- Desktop-only Buttons (visible on large desktop only) -->
-    <v-row class="btns desktop-only" align="center" justify="center" no-gutters>
+    <v-row v-if="showButtons" class="btns desktop-only" align="center" justify="center" no-gutters>
       <v-btn class="menu-btn" :to="'/fensterpage'">Fenster</v-btn>
       <v-btn class="menu-btn" :to="'/tuerenpage'">Haustüren</v-btn>
       <v-btn class="menu-btn" href="https://configurator.varialis.net/?bpi=BC27B19A-C106-404F-96C2-60B7AC4C9FD0" target="_blank" rel="noopener">Haustürenkonfigurator</v-btn>
       <v-btn class="menu-btn" :to="'/innentuerenpage'">Innentüren</v-btn>
       <v-btn class="menu-btn" @click="scrollToId('aktionen')">Aktionen</v-btn>
-      <v-btn class="menu-btn highlight">Impressum</v-btn>
+      <v-btn class="menu-btn highlight" :to="'/impressum'">Impressum</v-btn>
     </v-row>
 
     <!-- Kontakt-Popup (modern, normale Größe) -->
@@ -180,23 +109,32 @@
         ✉️
       </button>
     </div>
+
+    <!-- Footer -->
+    <SiteFooter />
   </v-app>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import logo from '@/assets/logo.png'
+import SiteFooter from '@/components/SiteFooter.vue'
+import sliderImg1 from '@/assets/GPT-SLIDER1.png'
+import sliderImg2 from '@/assets/GPT-SLIDER2.png'
+import sliderImg3 from '@/assets/GPT-SLIDER3.png'
 
+
+// Lokales Bild muss importiert werden, sonst findet Vite den Pfad nicht
 const items = [
-  'https://cdn.vuetifyjs.com/images/carousel/squirrel.jpg',
-  'https://cdn.vuetifyjs.com/images/carousel/sky.jpg',
-  'https://cdn.vuetifyjs.com/images/carousel/bird.jpg',
-  'https://cdn.vuetifyjs.com/images/carousel/planet.jpg',
+  sliderImg1,
+  sliderImg2,
+  sliderImg3,
 ]
 
 const menuOpen = ref(false)
 const router = useRouter()
+const showButtons = ref(true)
 const navItems = [
   { label: 'Fenster' },
   { label: 'Haustüren' },
@@ -353,6 +291,12 @@ onMounted(() => {
     if (delay) setTimeout(() => (contactOpen.value = true), delay)
     else contactOpen.value = true
   }
+  handleScroll()
+  window.addEventListener('scroll', handleScroll, { passive: true })
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
 })
 
 function scrollToId(id) {
@@ -374,7 +318,13 @@ function onNav(item) {
     router.push('/innentuerenpage')
   } else if (item.label === 'Aktionen') {
     scrollToId('aktionen')
+  } else if (item.label === 'Impressum') {
+    router.push('/impressum')
   }
+}
+
+function handleScroll() {
+  showButtons.value = window.scrollY < 80
 }
 
 
@@ -382,7 +332,6 @@ function onNav(item) {
 </script>
 
 <style>
-. 
 /* --- Layout --- */
 :root { --page-bg: #fafafa; }
 html, body { background: var(--page-bg); }
@@ -393,16 +342,6 @@ html, body { background: var(--page-bg); }
   overflow: hidden;
   isolation: isolate;
   background: var(--page-bg);
-}
-
-/* Bottom fade-out from slide into light background */
-.slide::after {
-  content: "";
-  position: absolute;
-  left: 0; right: 0; bottom: -1px;
-  height: 22svh; /* schneller Verlauf nach unten */
-  pointer-events: none;
-  background: linear-gradient(to bottom, rgba(255,255,255,0), var(--page-bg) 65%);
 }
 
 .background {
@@ -420,8 +359,9 @@ html, body { background: var(--page-bg); }
   padding: 0 16px;
 }
 
+.responsive-header { min-height: 72px; }
 .header-logo {
-  height: 40px;
+  height: auto;
   width: auto;
   object-fit: contain;
 }
@@ -432,11 +372,6 @@ html, body { background: var(--page-bg); }
 .nav-mobile-trigger { display: inline-flex; }
 
 /* --- Breakpoints --- */
-/* Header only for small to laptop widths; hide on large desktop */
-@media (min-width: 1280px) {
-  .responsive-header { display: none !important; }
-}
-
 /* Desktop button row only on large desktop */
 @media (max-width: 1279.98px) {
   .desktop-only { display: none !important; }
@@ -494,7 +429,7 @@ html, body { background: var(--page-bg); }
 
 /* --- Responsive adjustments --- */
 @media (min-width: 480px) {
-  .header-logo { height: 44px; }
+  .header-logo { max-height: 64px; }
   .menu-btn { font-size: 15px !important; }
 }
 
