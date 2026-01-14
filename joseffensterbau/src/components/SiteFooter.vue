@@ -40,9 +40,9 @@
         <v-col cols="12" md="3" class="footer-section">
           <h3 class="footer-title">LINKS:</h3>
           <ul class="footer-list">
-            <li><router-link to="/impressum" class="footer-link">Impressum</router-link></li>
-            <li><router-link to="/rechtliche-hinweise" class="footer-link">Rechtliche Hinweise</router-link></li>
-            <li><router-link to="/datenschutzrichtlinie" class="footer-link">Datenschutzrichtlinie</router-link></li>
+            <li><router-link to="/impressum#kontakt" class="footer-link">Impressum</router-link></li>
+            <li><router-link to="/impressum" class="footer-link">Rechtliche Hinweise</router-link></li>
+            <li><router-link to="/impressum" class="footer-link">Datenschutzrichtlinie</router-link></li>
           </ul>
         </v-col>
       </v-row>
@@ -56,7 +56,7 @@
 
 <style scoped>
 .site-footer {
-  background-color: #f5f5f7;
+  background-color: #2d2d2d;
   padding: 40px 0 30px;
   margin-top: 0;
 }
@@ -91,7 +91,7 @@
 .footer-title {
   font-size: 16px;
   font-weight: 700;
-  color: #1d1d1f;
+  color: #ffffff;
   margin: 0 0 16px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -100,7 +100,7 @@
 .footer-text {
   font-size: 14px;
   line-height: 1.6;
-  color: #1d1d1f;
+  color: #e5e5e5;
 }
 
 .footer-text p {
@@ -114,7 +114,7 @@
 .copyright {
   margin-top: 16px !important;
   font-size: 14px;
-  color: #1d1d1f;
+  color: #e5e5e5;
 }
 
 .footer-list {
@@ -139,7 +139,7 @@
 }
 
 .footer-link {
-  color: #1d1d1f;
+  color: #e5e5e5;
   text-decoration: none;
   transition: color 0.2s ease;
   font-size: 14px;

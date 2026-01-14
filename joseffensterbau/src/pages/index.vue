@@ -286,6 +286,8 @@ function openCard(card) {
 
 // Optional: Popup automatisch öffnen (wenn aktiviert)
 onMounted(() => {
+  // Scroll to top when page loads
+  window.scrollTo({ top: 0, behavior: 'smooth' })
   if (props.contactAutoOpen) {
     const delay = Math.max(0, Number(props.contactDelayMs || 0))
     if (delay) setTimeout(() => (contactOpen.value = true), delay)
@@ -375,6 +377,12 @@ html, body { background: var(--page-bg); }
 /* Desktop button row only on large desktop */
 @media (max-width: 1279.98px) {
   .desktop-only { display: none !important; }
+}
+
+/* Hide hamburger menu on large screens (desktop) */
+@media (min-width: 1280px) {
+  .nav-mobile-trigger { display: none !important; }
+  .responsive-header { display: none !important; }
 }
 
 /* Desktop buttons positioning (visible only when .desktop-only is shown) */

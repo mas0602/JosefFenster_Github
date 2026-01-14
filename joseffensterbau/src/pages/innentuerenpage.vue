@@ -1,5 +1,25 @@
 <template>
   <v-app>
+    <!-- Responsive Header (hidden on large desktop) -->
+    <v-app-bar density="comfortable" flat absolute color="transparent" class="responsive-header">
+      <div class="header-container">
+        <router-link to="/">
+          <img :src="logo" alt="Logo" class="header-logo" />
+        </router-link>
+        <div class="spacer" />
+        <!-- Only Hamburger Menu for small and laptop widths -->
+        <v-menu v-model="menuOpen" location="bottom end" :close-on-content-click="true">
+          <template #activator="{ props }">
+            <v-btn class="nav-mobile-trigger" v-bind="props" icon="mdi-menu" color="white" aria-label="Menü" />
+          </template>
+          <v-list density="comfortable">
+            <v-list-item v-for="(item, i) in navItems" :key="i" @click="onNav(item)">
+              <v-list-item-title>{{ item.label }}</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </div>
+    </v-app-bar>
     <v-main class="pa-0">
       <!-- Compact hero slideshow -->
       <section class="hero">
@@ -253,7 +273,9 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import SiteFooter from '@/components/SiteFooter.vue'
+import logo from '@/assets/logo.png'
 import sliderITmg1 from '@/assets/IT_Slider1.png'
 import sliderITmg2 from '@/assets/IT_Slider2.png'
 import sliderITmg3 from '@/assets/IT_Slider3.png'
@@ -270,12 +292,42 @@ const items = [
 // Expand/Collapse state per section
 const expanded = ref([false, false, false, false, false, false, false])
 const showButtons = ref(true)
+const menuOpen = ref(false)
+const router = useRouter()
+
+const navItems = [
+  { label: 'Startseite' },
+  { label: 'Fenster' },
+  { label: 'Haustüren' },
+  { label: 'Haustürenkonfigurator' },
+  { label: 'Innentüren' },
+  { label: 'Impressum' },
+]
+
+function onNav(item) {
+  menuOpen.value = false
+  if (item.label === 'Startseite') {
+    router.push('/')
+  } else if (item.label === 'Fenster') {
+    router.push('/fensterpage')
+  } else if (item.label === 'Haustüren') {
+    router.push('/tuerenpage')
+  } else if (item.label === 'Haustürenkonfigurator') {
+    window.open('https://configurator.varialis.net/?bpi=BC27B19A-C106-404F-96C2-60B7AC4C9FD0', '_blank', 'noopener')
+  } else if (item.label === 'Innentüren') {
+    router.push('/innentuerenpage')
+  } else if (item.label === 'Impressum') {
+    router.push('/impressum')
+  }
+}
 
 function handleScroll() {
   showButtons.value = window.scrollY < 80
 }
 
 onMounted(() => {
+  // Scroll to top when page loads
+  window.scrollTo({ top: 0, behavior: 'smooth' })
   handleScroll()
   window.addEventListener('scroll', handleScroll, { passive: true })
 })
@@ -372,6 +424,32 @@ onUnmounted(() => {
   .hero-title { font-size: 36px; }
   .section-title { font-size: 32px; }
   .section-img { height: 420px; }
+}
+
+/* Header Styles */
+.header-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0 16px;
+}
+
+.responsive-header { min-height: 72px; }
+.header-logo {
+  height: auto;
+  width: auto;
+  object-fit: contain;
+  max-height: 64px;
+}
+
+.spacer { flex: 1; }
+
+.nav-mobile-trigger { display: inline-flex; }
+
+/* Hide hamburger menu on large screens (desktop) */
+@media (min-width: 1280px) {
+  .nav-mobile-trigger { display: none !important; }
+  .responsive-header { display: none !important; }
 }
 
 /* Desktop-only buttons like on homepage */
