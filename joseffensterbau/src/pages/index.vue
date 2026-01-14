@@ -54,62 +54,6 @@
       <v-btn class="menu-btn highlight" :to="'/impressum'">Impressum</v-btn>
     </v-row>
 
-    <!-- Kontakt-Popup (modern, normale Größe) -->
-    <v-dialog id="email-dialog" v-model="contactOpen" max-width="480" persistent aria-label="Kontakt per E‑Mail">
-      <v-card elevation="8" rounded="lg">
-        <v-card-title class="text-h6">Kontakt per E‑Mail</v-card-title>
-        <v-card-text>
-          <p class="contact-text">Kontaktieren Sie uns per Mail – wir melden uns rasch zurück.</p>
-          <!-- E-Mail-Adresse hier anpassen: contactEmail (Prop) -->
-          <v-alert type="info" variant="tonal" border="start" class="mb-3" density="comfortable">
-            <strong>{{ contactEmail }}</strong>
-          </v-alert>
-
-          <!-- Demo-Kontaktformular: E-Mail, Nachricht, Telefonnummer -->
-          <v-form @submit.prevent="submitDemo" class="contact-form" aria-label="Kontaktformular (Demo)">
-            <v-text-field
-              v-model="form.email"
-              type="email"
-              label="Ihre E‑Mail"
-              placeholder="name@beispiel.at"
-              variant="outlined"
-              density="comfortable"
-              :rules="[v => !v || /.+@.+\..+/.test(v) || 'Bitte gültige E‑Mail eingeben']"
-            />
-            <v-text-field
-              v-model="form.phone"
-              type="tel"
-              label="Telefonnummer"
-              placeholder="z. B. +43 664 1234567"
-              variant="outlined"
-              density="comfortable"
-            />
-            <v-textarea
-              v-model="form.message"
-              label="Ihre Nachricht (was Sie möchten)"
-              placeholder="Kurz beschreiben, was Sie benötigen…"
-              variant="outlined"
-              density="comfortable"
-              rows="4"
-              auto-grow
-            />
-            <div class="contact-actions">
-              <v-spacer />
-              <v-btn variant="text" @click="contactOpen = false">Schließen</v-btn>
-              <v-btn type="submit" variant="flat">Absenden (Demo)</v-btn>
-            </div>
-          </v-form>
-        </v-card-text>
-      </v-card>
-    </v-dialog>
-
-    <!-- Floating CTA: Roter Text + Icon-Button -->
-    <div class="contact-cta" role="group" aria-label="Kontakt öffnen">
-      <button class="contact-fab" type="button" aria-controls="email-dialog" @click="contactOpen = true" aria-label="Kontakt per E‑Mail öffnen">
-        ✉️
-      </button>
-    </div>
-
     <!-- Footer -->
     <SiteFooter />
   </v-app>
@@ -148,17 +92,6 @@ const navItems = [
 const actionCategories = ['Fensteraktionen', 'Türenaktionen', 'Haustürenaktionen']
 const selectedCategory = ref(actionCategories[0])
 
-// Kontakt-Popup Zustand
-const contactOpen = ref(false)
-
-// Demo-Formular Zustand
-const form = ref({ email: '', phone: '', message: '' })
-
-function submitDemo() {
-  // Demo: hier könnte später ein echter Versand erfolgen
-  console.log('Demo submit:', { ...form.value })
-  contactOpen.value = false
-}
 
 // --- Dynamische Inhalte per Props (mit Defaults) ---
 // Intro-Text, Link-Leiste und Aktions-Karten können über Props überschrieben werden.
@@ -284,15 +217,9 @@ function openCard(card) {
 }
 // --- Kontakt-Popup Einstellungen ---
 
-// Optional: Popup automatisch öffnen (wenn aktiviert)
 onMounted(() => {
   // Scroll to top when page loads
   window.scrollTo({ top: 0, behavior: 'smooth' })
-  if (props.contactAutoOpen) {
-    const delay = Math.max(0, Number(props.contactDelayMs || 0))
-    if (delay) setTimeout(() => (contactOpen.value = true), delay)
-    else contactOpen.value = true
-  }
   handleScroll()
   window.addEventListener('scroll', handleScroll, { passive: true })
 })
@@ -547,34 +474,4 @@ html, body { background: var(--page-bg); }
 .anchor-target { padding: 40px 0; }
 .anchor-target h2 { margin-top: 0; }
 
-/* --- Kontakt-Popup / FAB --- */
-.contact-cta {
-  position: fixed;
-  right: 16px;
-  bottom: 16px;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  z-index: 2147483647;
-}
-@media (min-width: 768px) {
-  .contact-cta { right: 24px; bottom: 24px; }
-}
-.contact-fab {
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  border: 1px solid rgba(214,48,49,0.35);
-  background: #ffffff;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.10);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  cursor: pointer;
-}
-.contact-fab:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
-@media (min-width: 768px) {
-  .contact-fab { right: 24px; bottom: 24px; }
-}
 </style>
