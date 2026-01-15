@@ -50,7 +50,6 @@
       <v-btn class="menu-btn" :to="'/tuerenpage'">Haustüren</v-btn>
       <v-btn class="menu-btn" href="https://configurator.varialis.net/?bpi=BC27B19A-C106-404F-96C2-60B7AC4C9FD0" target="_blank" rel="noopener">Haustürenkonfigurator</v-btn>
       <v-btn class="menu-btn" :to="'/innentuerenpage'">Innentüren</v-btn>
-      <v-btn class="menu-btn" @click="scrollToId('aktionen')">Aktionen</v-btn>
       <v-btn class="menu-btn highlight" :to="'/impressum'">Impressum</v-btn>
     </v-row>
 
