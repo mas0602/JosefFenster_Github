@@ -1,18 +1,28 @@
 <template>
   <v-app>
+    <!-- Fixed Logo (top-left, hides on scroll like the desktop buttons; stays visible in fullscreen) -->
+    <div v-show="showButtons" class="fixed-logo" aria-label="Firmenlogo">
+      <img :src="logo" alt="Logo" class="header-logo" />
+    </div>
     <!-- Responsive Header (hidden on large desktop) -->
     <v-app-bar density="comfortable" flat absolute color="transparent" class="responsive-header">
       <div class="header-container">
-        <img :src="logo" alt="Logo" class="header-logo" />
-        <div class="spacer" />
         <!-- Only Hamburger Menu for small and laptop widths -->
-        <v-menu v-model="menuOpen" location="bottom end" :close-on-content-click="true">
+        <v-menu v-model="menuOpen" location="bottom end" :close-on-content-click="true" content-class="mobile-nav-menu">
           <template #activator="{ props }">
             <v-btn class="nav-mobile-trigger" v-bind="props" icon="mdi-menu" color="white" aria-label="Menü" />
           </template>
-          <v-list density="comfortable">
-            <v-list-item v-for="(item, i) in navItems" :key="i" @click="onNav(item)">
-              <v-list-item-title>{{ item.label }}</v-list-item-title>
+          <v-list class="mobile-nav-list" density="default">
+            <v-list-item
+              v-for="(item, i) in navItems"
+              :key="i"
+              class="mobile-nav-item"
+              @click="onNav(item)"
+            >
+              <template #prepend>
+                <v-icon :icon="item.icon" class="mobile-nav-icon" />
+              </template>
+              <v-list-item-title class="mobile-nav-title">{{ item.label }}</v-list-item-title>
             </v-list-item>
           </v-list>
         </v-menu>
@@ -21,7 +31,7 @@
     <v-main class="pa-0">
       <div class="slide">
         <v-carousel
-          class="background"
+          class="background" 
           transition-duration="700"
           crossfade
           show-arrows="hover"
@@ -78,13 +88,14 @@ const items = [
 const menuOpen = ref(false)
 const router = useRouter()
 const showButtons = ref(true)
+const lastScrollY = ref(0)
 const navItems = [
-  { label: 'Fenster' },
-  { label: 'Haustüren' },
-  { label: 'Haustürenkonfigurator' },
-  { label: 'Innentüren' },
-  { label: 'Aktionen' },
-  { label: 'Impressum' },
+  { label: 'Startseite', icon: 'mdi-home' },
+  { label: 'Fenster', icon: 'mdi-window-closed-variant' },
+  { label: 'Haustüren', icon: 'mdi-door' },
+  { label: 'Haustürenkonfigurator', icon: 'mdi-tune-variant' },
+  { label: 'Innentüren', icon: 'mdi-door-sliding' },
+  { label: 'Impressum', icon: 'mdi-file-document-outline' },
 ]
 
 // Aktionen-Kategorien (Tabs) und Auswahl
@@ -108,7 +119,6 @@ const props = defineProps({
       { label: 'Fenster', target: 'fenster' },
       { label: 'Haustüren', target: 'haustueren' },
       { label: 'Innentüren', target: 'innentueren' },
-      { label: 'Aktionen', target: 'aktionen' }
     ]
   },
   // Karten für "Moderne Aktionen der Woche"
@@ -219,7 +229,10 @@ function openCard(card) {
 onMounted(() => {
   // Scroll to top when page loads
   window.scrollTo({ top: 0, behavior: 'smooth' })
+
+  lastScrollY.value = window.scrollY || 0
   handleScroll()
+
   window.addEventListener('scroll', handleScroll, { passive: true })
 })
 
@@ -236,7 +249,9 @@ function scrollToId(id) {
 
 function onNav(item) {
   menuOpen.value = false
-  if (item.label === 'Fenster') {
+  if (item.label === 'Startseite') {
+    router.push('/')
+  } else if (item.label === 'Fenster') {
     router.push('/fensterpage')
   } else if (item.label === 'Haustüren') {
     router.push('/tuerenpage')
@@ -244,15 +259,29 @@ function onNav(item) {
     window.open('https://configurator.varialis.net/?bpi=BC27B19A-C106-404F-96C2-60B7AC4C9FD0', '_blank', 'noopener')
   } else if (item.label === 'Innentüren') {
     router.push('/innentuerenpage')
-  } else if (item.label === 'Aktionen') {
-    scrollToId('aktionen')
   } else if (item.label === 'Impressum') {
     router.push('/impressum')
   }
 }
 
 function handleScroll() {
-  showButtons.value = window.scrollY < 80
+  const currentY = window.scrollY || 0
+  const diff = currentY - lastScrollY.value
+
+  const alwaysShowAtTop = 80
+  const threshold = 8 // prevents flicker on tiny scroll changes
+
+  if (currentY <= alwaysShowAtTop) {
+    showButtons.value = true
+  } else if (diff > threshold) {
+    // scrolling down -> hide
+    showButtons.value = false
+  } else if (diff < -threshold) {
+    // scrolling up -> show
+    showButtons.value = true
+  }
+
+  lastScrollY.value = currentY
 }
 
 
@@ -285,19 +314,111 @@ html, body { background: var(--page-bg); }
   align-items: center;
   width: 100%;
   padding: 0 16px;
+  justify-content: flex-end;
 }
 
 .responsive-header { min-height: 72px; }
+
+.fixed-logo {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 2147483647 !important;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  pointer-events: none; /* avoids blocking clicks on buttons */
+}
+
+@media (max-width: 479.98px) {
+  .fixed-logo { top: 12px; left: 12px; }
+  .header-logo { width: clamp(96px, 30vw, 160px); max-height: 56px; }
+}
+
 .header-logo {
+  width: clamp(120px, 18vw, 240px);
+  max-height: 72px;
   height: auto;
-  width: auto;
   object-fit: contain;
+  display: block;
 }
 
 .spacer { flex: 1; }
 
 
-.nav-mobile-trigger { display: inline-flex; }
+.nav-mobile-trigger {
+  display: inline-flex;
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18) !important;
+  border: 1px solid rgba(255, 255, 255, 0.28) !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  backdrop-filter: blur(10px);
+  z-index: 2147483647 !important;
+}
+
+.nav-mobile-trigger:hover {
+  background: rgba(255, 255, 255, 0.24) !important;
+}
+
+/* --- Mobile menu (glass / liquid) --- */
+.mobile-nav-menu {
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(20, 20, 20, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.45);
+  backdrop-filter: blur(14px);
+}
+
+.mobile-nav-list {
+  background: transparent !important;
+  padding: 10px;
+  min-width: min(320px, 92vw);
+}
+
+.mobile-nav-item {
+  border-radius: 14px;
+  margin: 6px 4px;
+  padding: 6px 8px;
+}
+
+.mobile-nav-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Vuetify internal overlays can cancel custom glass backgrounds */
+.mobile-nav-item .v-list-item__overlay { opacity: 0 !important; }
+.mobile-nav-item .v-list-item__underlay { opacity: 0 !important; }
+.mobile-nav-item .v-list-item__content { color: #fff !important; }
+.mobile-nav-item .v-list-item-title { color: #fff !important; }
+
+/* Stronger glass effect on the clickable surface */
+.mobile-nav-item.v-list-item {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+}
+.mobile-nav-item.v-list-item:hover {
+  background: rgba(255, 255, 255, 0.10) !important;
+}
+
+.mobile-nav-icon {
+  opacity: 0.95;
+  color: #fff !important;
+}
+
+.mobile-nav-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #fff !important;
+}
+
+@media (max-width: 479.98px) {
+  .mobile-nav-list { min-width: min(300px, 92vw); }
+  .mobile-nav-title { font-size: 1.05rem; }
+}
 
 /* --- Breakpoints --- */
 /* Desktop button row only on large desktop */
@@ -373,6 +494,37 @@ html, body { background: var(--page-bg); }
 
 @media (min-width: 1024px) {
   .btns.desktop-only { gap: 32px; top: 28px; right: 32px; }
+}
+
+/* --- Mobile-friendly: put "Programm:" and "LINKS:" side-by-side on phone --- */
+.program-links-head {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@media (max-width: 600px) {
+  .program-links-head {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .program-label,
+  .links-label {
+    margin: 0;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(0,0,0,0.45);
+    color: #fff;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    line-height: 1;
+    backdrop-filter: blur(6px);
+  }
 }
 
 /* --- Intro & Anchor Nav --- */
