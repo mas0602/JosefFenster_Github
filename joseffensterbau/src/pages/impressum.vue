@@ -1,20 +1,34 @@
 <template>
   <v-app>
+    <!-- Fixed Logo (top-left, hides on scroll like the desktop buttons) -->
+    <div v-show="showButtons" class="fixed-logo" aria-label="Firmenlogo">
+      <img :src="logo" alt="Logo" class="header-logo" />
+    </div>
     <!-- Responsive Header (hidden on large desktop) -->
     <v-app-bar density="comfortable" flat color="transparent" class="responsive-header">
       <div class="header-container">
-        <router-link to="/">
-          <img :src="logo" alt="Logo" class="header-logo" />
-        </router-link>
         <div class="spacer" />
         <!-- Only Hamburger Menu for small and laptop widths -->
-        <v-menu v-model="menuOpen" location="bottom end" :close-on-content-click="true">
+        <v-menu
+          v-model="menuOpen"
+          location="bottom end"
+          :close-on-content-click="true"
+          content-class="mobile-nav-menu"
+        >
           <template #activator="{ props }">
             <v-btn class="nav-mobile-trigger" v-bind="props" icon="mdi-menu" color="black" aria-label="Menü" />
           </template>
-          <v-list density="comfortable">
-            <v-list-item v-for="(item, i) in navItems" :key="i" @click="onNav(item)">
-              <v-list-item-title>{{ item.label }}</v-list-item-title>
+          <v-list class="mobile-nav-list" density="default">
+            <v-list-item
+              v-for="(item, i) in navItems"
+              :key="i"
+              class="mobile-nav-item"
+              @click="onNav(item)"
+            >
+              <template #prepend>
+                <v-icon :icon="item.icon" class="mobile-nav-icon" />
+              </template>
+              <v-list-item-title class="mobile-nav-title">{{ item.label }}</v-list-item-title>
             </v-list-item>
           </v-list>
         </v-menu>
@@ -291,15 +305,16 @@ import logo from '@/assets/logo.png'
 const route = useRoute()
 const router = useRouter()
 const showButtons = ref(true)
+const lastScrollY = ref(0)
 const menuOpen = ref(false)
 
 const navItems = [
-  { label: 'Startseite' },
-  { label: 'Fenster' },
-  { label: 'Haustüren' },
-  { label: 'Haustürenkonfigurator' },
-  { label: 'Innentüren' },
-  { label: 'Impressum' },
+  { label: 'Startseite', icon: 'mdi-home' },
+  { label: 'Fenster', icon: 'mdi-window-closed-variant' },
+  { label: 'Haustüren', icon: 'mdi-door' },
+  { label: 'Haustürenkonfigurator', icon: 'mdi-tune-variant' },
+  { label: 'Innentüren', icon: 'mdi-door-sliding' },
+  { label: 'Impressum', icon: 'mdi-file-document-outline' },
 ]
 
 function onNav(item) {
@@ -320,13 +335,28 @@ function onNav(item) {
 }
 
 function handleScroll() {
-  showButtons.value = window.scrollY < 80
+  const currentY = window.scrollY || 0
+  const diff = currentY - lastScrollY.value
+
+  const alwaysShowAtTop = 80
+  const threshold = 8
+
+  if (currentY <= alwaysShowAtTop) {
+    showButtons.value = true
+  } else if (diff > threshold) {
+    showButtons.value = false
+  } else if (diff < -threshold) {
+    showButtons.value = true
+  }
+
+  lastScrollY.value = currentY
 }
 
 onMounted(() => {
+  lastScrollY.value = window.scrollY || 0
   handleScroll()
   window.addEventListener('scroll', handleScroll, { passive: true })
-  
+
   // Scroll to anchor if hash is present in URL
   if (route.hash) {
     nextTick(() => {
@@ -520,7 +550,7 @@ onUnmounted(() => {
 .legal-panels :deep(.v-expansion-panel) {
   margin-bottom: 8px;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: none !important;
   background-color: #ffffff !important;
 }
 
@@ -548,9 +578,65 @@ onUnmounted(() => {
   max-height: 64px;
 }
 
+.mobile-nav-menu {
+  border-radius: 16px;
+  overflow: hidden;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(14px);
+}
+
+.fixed-logo {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 2147483647 !important;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+
+@media (max-width: 479.98px) {
+  .fixed-logo { top: 12px; left: 12px; }
+  .header-logo { width: clamp(96px, 30vw, 160px); max-height: 56px; }
+}
+
+@media (max-width: 479.98px) {
+  .nav-mobile-trigger { transform: translateY(6px) !important; }
+}
+
+/* Mobile nav: make icons and labels dark for readability */
+.mobile-nav-list .mobile-nav-item .mobile-nav-title {
+  color: #1d1d1f !important;
+}
+.mobile-nav-list .mobile-nav-item .mobile-nav-icon {
+  color: #4b5563 !important;
+}
+
+/* Ensure the hamburger (nav-mobile-trigger) uses same dark color */
+.nav-mobile-trigger {
+  color: #1d1d1f !important;
+}
+.nav-mobile-trigger .v-icon,
+.nav-mobile-trigger svg {
+  color: inherit !important;
+  fill: currentColor !important;
+}
+
 .spacer { flex: 1; }
 
-.nav-mobile-trigger { display: inline-flex; }
+.nav-mobile-trigger {
+  display: inline-flex;
+  padding: 8px !important;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
 
 /* Hide hamburger menu on large screens (desktop) */
 @media (min-width: 1280px) {

@@ -336,11 +336,10 @@ html, body { background: var(--page-bg); }
 }
 
 .header-logo {
-  width: clamp(120px, 18vw, 240px);
-  max-height: 72px;
   height: auto;
+  width: auto;
   object-fit: contain;
-  display: block;
+  max-height: 64px;
 }
 
 .spacer { flex: 1; }
@@ -348,40 +347,40 @@ html, body { background: var(--page-bg); }
 
 .nav-mobile-trigger {
   display: inline-flex;
-  width: 52px;
-  height: 52px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.18) !important;
-  border: 1px solid rgba(255, 255, 255, 0.28) !important;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-  backdrop-filter: blur(10px);
+  padding: 8px !important;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
   z-index: 2147483647 !important;
 }
 
 .nav-mobile-trigger:hover {
-  background: rgba(255, 255, 255, 0.24) !important;
+  background: transparent !important;
 }
 
-/* --- Mobile menu (glass / liquid) --- */
+/* --- Mobile menu (glass / liquid, etwas dünner) --- */
 .mobile-nav-menu {
-  border-radius: 18px;
+  border-radius: 16px;
   overflow: hidden;
-  background: rgba(20, 20, 20, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 18px 50px rgba(0,0,0,0.45);
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
   backdrop-filter: blur(14px);
 }
 
 .mobile-nav-list {
   background: transparent !important;
-  padding: 10px;
-  min-width: min(320px, 92vw);
+  padding: 6px;
+  min-width: min(300px, 92vw);
 }
 
 .mobile-nav-item {
-  border-radius: 14px;
-  margin: 6px 4px;
-  padding: 6px 8px;
+  border-radius: 12px;
+  margin: 4px 4px;
+  padding: 4px 6px;
 }
 
 .mobile-nav-item:hover {
@@ -396,11 +395,11 @@ html, body { background: var(--page-bg); }
 
 /* Stronger glass effect on the clickable surface */
 .mobile-nav-item.v-list-item {
-  background: rgba(255, 255, 255, 0.06) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
   border: 1px solid rgba(255, 255, 255, 0.10) !important;
 }
 .mobile-nav-item.v-list-item:hover {
-  background: rgba(255, 255, 255, 0.10) !important;
+  background: rgba(255, 255, 255, 0.09) !important;
 }
 
 .mobile-nav-icon {
@@ -409,15 +408,19 @@ html, body { background: var(--page-bg); }
 }
 
 .mobile-nav-title {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.01em;
   color: #fff !important;
 }
 
 @media (max-width: 479.98px) {
-  .mobile-nav-list { min-width: min(300px, 92vw); }
-  .mobile-nav-title { font-size: 1.05rem; }
+  .mobile-nav-list { min-width: min(280px, 92vw); }
+  .mobile-nav-title { font-size: 0.98rem; }
+}
+
+@media (max-width: 479.98px) {
+  .nav-mobile-trigger { transform: translateY(6px) !important; }
 }
 
 /* --- Breakpoints --- */
@@ -493,7 +496,7 @@ html, body { background: var(--page-bg); }
 }
 
 @media (min-width: 1024px) {
-  .btns.desktop-only { gap: 32px; top: 28px; right: 32px; }
+  .btns.desktop-only { gap: 24px; top: 24px; right: 24px; }
 }
 
 /* --- Mobile-friendly: put "Programm:" and "LINKS:" side-by-side on phone --- */
